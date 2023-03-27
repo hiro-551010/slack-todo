@@ -1,0 +1,6 @@
+{
+    "challenge": {
+        "SLACK_CHANNEL_ID": "dummyChannel",
+        "SLACK_API_TOKEN": "dummyToken"
+    }
+}

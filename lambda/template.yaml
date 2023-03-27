@@ -1,0 +1,64 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  slack-todo-app
+
+Globals:
+  Function:
+    Timeout: 30
+
+Parameters:
+  SlackChannelId:
+    Type: String
+  SlackApiToken:
+    Type: String
+
+Resources:
+  Challenge:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: challenge
+      CodeUri: challenge/
+      Handler: index.handler
+      Runtime: nodejs16.x
+      Role: arn:aws:iam::907081723216:role/SamDeployRole
+      Architectures:
+        - arm64
+      Environment:
+        Variables:
+          TZ: Asia/Tokyo
+      Events:
+        ChallengeApi:
+          Type: Api
+          Properties:
+            Path: /challenge
+            Method: post
+            RestApiId: !Ref SlackTodoApi
+      Environment:
+        # samconfig.tomlから環境変数取得
+        Variables:
+          SLACK_CHANNEL_ID: !Ref SlackChannelId
+          SLACK_API_TOKEN: !Ref SlackApiToken
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "ES2020"
+        Sourcemap: true
+        EntryPoints:
+          - index.ts
+
+  SlackTodoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: slack-todo-api
+      EndpointConfiguration:
+        Type: REGIONAL
+      StageName: prod
+
+  SlackTodoLogs:
+    Type: 'AWS::Logs::LogGroup'
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${Challenge}'
+      RetentionInDays: 1
+
