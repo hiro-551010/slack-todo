@@ -10,7 +10,9 @@ Globals:
 Parameters:
   SlackChannelId:
     Type: String
-  SlackApiToken:
+  SlackApiUserToken:
+    Type: String
+  SlackApiBotToken:
     Type: String
 
 Resources:
@@ -38,7 +40,8 @@ Resources:
         # samconfig.tomlから環境変数取得
         Variables:
           SLACK_CHANNEL_ID: !Ref SlackChannelId
-          SLACK_API_TOKEN: !Ref SlackApiToken
+          SLACK_API_USER_TOKEN: !Ref SlackApiUserToken
+          SLACK_API_BOT_TOKEN: !Ref SlackApiBotToken
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
