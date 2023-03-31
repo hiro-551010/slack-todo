@@ -42,6 +42,7 @@ Resources:
           SLACK_CHANNEL_ID: !Ref SlackChannelId
           SLACK_API_USER_TOKEN: !Ref SlackApiUserToken
           SLACK_API_BOT_TOKEN: !Ref SlackApiBotToken
+          TZ: Asia/Tokyo
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
