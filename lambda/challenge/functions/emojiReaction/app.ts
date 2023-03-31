@@ -1,9 +1,9 @@
 import { ChatPostMessageResponse, ConversationsHistoryResponse, WebClient } from '@slack/web-api';
+import dayjs, { Dayjs } from 'dayjs';
 // TODO: Messageの型情報を持っているファイルのimport
 // Channelもおそらくこれではない
 import { Channel } from '@slack/web-api/dist/response/ConversationsListResponse';
 import { Message } from '@slack/web-api/dist/response/ConversationsHistoryResponse';
-
 import { SLACK_TOKENS } from '../../models/slackTokens';
 
 export class EmojiReaction {
@@ -37,21 +37,29 @@ export class EmojiReaction {
       });
       const message: any = result.messages![0];
 
+      // unixTimeを取得してtimestampとする
+      const now: Dayjs = dayjs();
+      const startOfToday: number = now.startOf('date').unix();
+      const endOfToday: number = now.endOf('date').unix();
       // メッセージスレッドを検索するために必要な情報を取得
       try {
         const searchText = '今日のTODO';
-        const result = await client.conversations.history({ channel: DM_TO_BOT_CHANNEL_ID });
+        const result = await client.conversations.history({
+          channel: DM_TO_BOT_CHANNEL_ID,
+          oldest: startOfToday.toString(),
+          latest: endOfToday.toString(),
+        });
         const targetMessage = result.messages?.find(m => m.text!.includes(searchText))!;
 
         // スレッド内に新しいメッセージを投稿
         await this.postMessage(client, targetChannel.id, message.text, targetMessage.ts!);
       } catch (error) {
+        // 今日のTODOを見つけられなかったとき
         const postMessageResponse: ChatPostMessageResponse =
           await client.chat.postMessage({
             channel: targetChannel.id!,
             text: '今日のTODO',
             reply_broadcast: true,
-            thread_ts: timestamp,
         });
         const threadTimestamp = postMessageResponse.ts!;
         // スレッド内に新しいメッセージを投稿
